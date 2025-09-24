@@ -125,9 +125,48 @@ const Index = () => {
   };
 
   const handleDownload = (stage: number, artifact: string) => {
+    // Generate mock file content based on the artifact type
+    let content = '';
+    let mimeType = 'text/plain';
+    let fileName = artifact;
+
+    if (artifact.endsWith('.json')) {
+      const stageResult = mockResults.find(r => r.stage === stage);
+      content = JSON.stringify(stageResult?.data || {}, null, 2);
+      mimeType = 'application/json';
+    } else if (artifact.endsWith('.csv')) {
+      // Generate CSV for knowledge relationships
+      if (stage === 2) {
+        content = "entity,relation,evidence_score\n";
+        const stageResult = mockResults.find(r => r.stage === stage);
+        stageResult?.data.forEach((item: any) => {
+          content += `"${item.entity}","${item.relation}",${item.evidence_score}\n`;
+        });
+      } else {
+        content = "data,value\nsample_data,1.0\n";
+      }
+      mimeType = 'text/csv';
+    } else if (artifact.endsWith('.pdf')) {
+      // For PDF, we'll create a simple text file with report content
+      content = `Research Report - ${artifact}\n\nStage ${stage} Results\n\nGenerated on: ${new Date().toISOString()}\n\nThis is a mock PDF report containing the research findings from Stage ${stage}.`;
+      fileName = artifact.replace('.pdf', '.txt');
+      mimeType = 'text/plain';
+    }
+
+    // Create and trigger download
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     toast({
-      title: "Download Started",
-      description: `Downloading ${artifact} from Stage ${stage}`,
+      title: "Download Complete",
+      description: `${artifact} from Stage ${stage} has been downloaded`,
     });
   };
 
