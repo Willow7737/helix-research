@@ -2,41 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Universal Researcher AI Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Scientific Research Theme - Blues & Purples */
+    --background: 210 20% 98%;
+    --foreground: 220 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
+    /* Primary: Deep Research Blue */
+    --primary: 214 84% 30%;
     --primary-foreground: 210 40% 98%;
+    --primary-glow: 214 84% 45%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary: Scientific Purple */
+    --secondary: 260 45% 45%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent: Innovation Green */
+    --accent: 150 70% 35%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 15% 90%;
+    --input: 220 15% 95%;
+    --ring: 214 84% 30%;
 
-    --radius: 0.5rem;
+    /* Research-specific colors */
+    --stage-1: 200 85% 50%;  /* Ingestion - Ocean Blue */
+    --stage-2: 220 75% 55%;  /* Modeling - Deep Blue */
+    --stage-3: 240 65% 60%;  /* Hypothesis - Purple Blue */
+    --stage-4: 260 60% 55%;  /* Simulation - Purple */
+    --stage-5: 280 70% 50%;  /* Validation - Violet */
+    --stage-6: 300 75% 45%;  /* Learning - Magenta */
+
+    /* Ethics colors */
+    --ethics-approved: 120 70% 40%;
+    --ethics-warning: 45 85% 55%;
+    --ethics-denied: 0 75% 55%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-research: linear-gradient(135deg, hsl(var(--stage-1)), hsl(var(--stage-6)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-stage: linear-gradient(90deg, hsl(var(--stage-1)), hsl(var(--stage-2)), hsl(var(--stage-3)), hsl(var(--stage-4)), hsl(var(--stage-5)), hsl(var(--stage-6)));
+
+    /* Shadows */
+    --shadow-research: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+    --shadow-stage: 0 5px 20px -5px hsl(var(--primary) / 0.15);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.3);
+
+    /* Animations */
+    --transition-research: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 

@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -47,6 +48,21 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Research pipeline stage colors
+        stage: {
+          1: "hsl(var(--stage-1))",
+          2: "hsl(var(--stage-2))",
+          3: "hsl(var(--stage-3))",
+          4: "hsl(var(--stage-4))",
+          5: "hsl(var(--stage-5))",
+          6: "hsl(var(--stage-6))",
+        },
+        // Ethics validation colors
+        ethics: {
+          approved: "hsl(var(--ethics-approved))",
+          warning: "hsl(var(--ethics-warning))",
+          denied: "hsl(var(--ethics-denied))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -62,6 +78,17 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-research': 'var(--gradient-research)',
+        'gradient-subtle': 'var(--gradient-subtle)',
+        'gradient-stage': 'var(--gradient-stage)',
+      },
+      boxShadow: {
+        'research': 'var(--shadow-research)',
+        'stage': 'var(--shadow-stage)',
+        'glow': 'var(--shadow-glow)',
       },
       keyframes: {
         "accordion-down": {
@@ -80,10 +107,44 @@ export default {
             height: "0",
           },
         },
+        "research-pulse": {
+          "0%, 100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "0.8",
+            transform: "scale(1.05)",
+          },
+        },
+        "stage-progress": {
+          "0%": {
+            transform: "translateX(-100%)",
+          },
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
+        "data-flow": {
+          "0%": {
+            transform: "translateY(0px)",
+            opacity: "0",
+          },
+          "50%": {
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateY(-20px)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "research-pulse": "research-pulse 3s ease-in-out infinite",
+        "stage-progress": "stage-progress 2s ease-in-out infinite",
+        "data-flow": "data-flow 2s ease-in-out infinite",
       },
     },
   },
