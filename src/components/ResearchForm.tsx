@@ -150,7 +150,6 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
                         ? 'border-primary bg-primary/5 shadow-stage' 
                         : 'border-border hover:border-primary/50'
                     }`}
-                    onClick={() => toggleDataSource(source.id)}
                   >
                     <div className="flex items-start gap-3">
                       <Checkbox
