@@ -17,6 +17,7 @@ import {
   ExternalLink 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 
 const Index = () => {
   const [currentTopic, setCurrentTopic] = useState("");
@@ -102,6 +103,7 @@ const Index = () => {
     setCurrentTopic(topic);
     setIsRunning(true);
     setActiveTab("pipeline");
+    setResults([]); // Clear previous results
     
     toast({
       title: "Research Started",
@@ -125,36 +127,125 @@ const Index = () => {
   };
 
   const handleDownload = (stage: number, artifact: string) => {
-    // Generate mock file content based on the artifact type
-    let content = '';
-    let mimeType = 'text/plain';
-    let fileName = artifact;
-
+    const stageResult = results.find(r => r.stage === stage);
+    
     if (artifact.endsWith('.json')) {
-      const stageResult = mockResults.find(r => r.stage === stage);
-      content = JSON.stringify(stageResult?.data || {}, null, 2);
-      mimeType = 'application/json';
+      const content = JSON.stringify(stageResult?.data || {}, null, 2);
+      const blob = new Blob([content], { type: 'application/json' });
+      downloadFile(blob, artifact);
     } else if (artifact.endsWith('.csv')) {
-      // Generate CSV for knowledge relationships
+      let content = '';
       if (stage === 2) {
         content = "entity,relation,evidence_score\n";
-        const stageResult = mockResults.find(r => r.stage === stage);
         stageResult?.data.forEach((item: any) => {
           content += `"${item.entity}","${item.relation}",${item.evidence_score}\n`;
         });
       } else {
         content = "data,value\nsample_data,1.0\n";
       }
-      mimeType = 'text/csv';
+      const blob = new Blob([content], { type: 'text/csv' });
+      downloadFile(blob, artifact);
     } else if (artifact.endsWith('.pdf')) {
-      // For PDF, we'll create a simple text file with report content
-      content = `Research Report - ${artifact}\n\nStage ${stage} Results\n\nGenerated on: ${new Date().toISOString()}\n\nThis is a mock PDF report containing the research findings from Stage ${stage}.`;
-      fileName = artifact.replace('.pdf', '.txt');
-      mimeType = 'text/plain';
+      // Generate real PDF using jsPDF
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // Header
+      pdf.setFontSize(20);
+      pdf.setFont(undefined, 'bold');
+      pdf.text('Universal Researcher AI', 20, 30);
+      pdf.setFontSize(16);
+      pdf.text(`Stage ${stage}: ${stageResult?.name || 'Research Report'}`, 20, 45);
+      
+      // Date and metadata
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, 'normal');
+      pdf.text(`Generated on: ${new Date().toLocaleString()}`, 20, 55);
+      pdf.text(`Research Topic: ${currentTopic}`, 20, 62);
+      
+      // Stage details
+      let yPos = 80;
+      pdf.setFontSize(14);
+      pdf.setFont(undefined, 'bold');
+      pdf.text('Stage Overview', 20, yPos);
+      yPos += 10;
+      
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, 'normal');
+      const stageDescriptions = {
+        1: 'Data ingestion and curation from multiple research sources',
+        2: 'Knowledge modeling and entity relationship extraction',
+        3: 'Hypothesis generation with experimental design',
+        4: 'Computational simulation and risk assessment',
+        5: 'Real-world validation and statistical analysis',
+        6: 'Learning loop updates and research dissemination'
+      };
+      
+      pdf.text(stageDescriptions[stage as keyof typeof stageDescriptions] || '', 20, yPos);
+      yPos += 20;
+      
+      // Metrics
+      if (stageResult?.metrics) {
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Performance Metrics', 20, yPos);
+        yPos += 10;
+        
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        Object.entries(stageResult.metrics).forEach(([key, value]) => {
+          if (typeof value === 'number') {
+            pdf.text(`${key}: ${Math.round(value * 100)}%`, 20, yPos);
+            yPos += 7;
+          }
+        });
+        yPos += 10;
+      }
+      
+      // Data summary
+      if (stageResult?.data) {
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Results Summary', 20, yPos);
+        yPos += 10;
+        
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        if (Array.isArray(stageResult.data)) {
+          pdf.text(`Total items processed: ${stageResult.data.length}`, 20, yPos);
+          yPos += 7;
+          
+          stageResult.data.slice(0, 5).forEach((item: any, index: number) => {
+            if (yPos > pageHeight - 30) {
+              pdf.addPage();
+              yPos = 30;
+            }
+            
+            const text = item.title || item.statement || item.entity || `Item ${index + 1}`;
+            const lines = pdf.splitTextToSize(text, pageWidth - 40);
+            pdf.text(lines, 20, yPos);
+            yPos += lines.length * 5 + 3;
+          });
+        }
+      }
+      
+      // Footer
+      pdf.setFontSize(8);
+      pdf.text('Generated by Universal Researcher AI - Automated Research Pipeline', 20, pageHeight - 10);
+      
+      // Download the PDF
+      pdf.save(artifact);
     }
 
-    // Create and trigger download
-    const blob = new Blob([content], { type: mimeType });
+    toast({
+      title: "Download Complete",
+      description: `${artifact} from Stage ${stage} has been downloaded`,
+    });
+  };
+
+  const downloadFile = (blob: Blob, fileName: string) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -163,11 +254,6 @@ const Index = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
-    toast({
-      title: "Download Complete",
-      description: `${artifact} from Stage ${stage} has been downloaded`,
-    });
   };
 
   return (
@@ -272,6 +358,7 @@ const Index = () => {
               <ResearchPipeline
                 topic={currentTopic}
                 isRunning={isRunning}
+                results={results}
                 onStageClick={handleStageClick}
               />
             )}

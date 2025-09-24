@@ -29,66 +29,72 @@ interface ResearchStage {
 interface ResearchPipelineProps {
   topic: string;
   isRunning: boolean;
+  results?: any[];
   onStageClick: (stage: ResearchStage) => void;
 }
 
-export function ResearchPipeline({ topic, isRunning, onStageClick }: ResearchPipelineProps) {
-  const [stages, setStages] = useState<ResearchStage[]>([
+export function ResearchPipeline({ topic, isRunning, results = [], onStageClick }: ResearchPipelineProps) {
+  // Update stages based on results
+  const getStageStatus = (stageId: number): { status: 'pending' | 'running' | 'completed' | 'error'; ethicsStatus: 'pending' | 'approved' | 'warning' | 'denied'; progress: number } => {
+    const result = results.find(r => r.stage === stageId);
+    if (result) {
+      return {
+        status: result.status as 'pending' | 'running' | 'completed' | 'error',
+        ethicsStatus: result.ethicsStatus as 'pending' | 'approved' | 'warning' | 'denied',
+        progress: result.status === 'completed' ? 100 : isRunning ? 50 : 0
+      };
+    }
+    return {
+      status: (isRunning && stageId <= (results.length + 1) ? 'running' : 'pending') as 'pending' | 'running' | 'completed' | 'error',
+      ethicsStatus: 'pending' as 'pending' | 'approved' | 'warning' | 'denied',
+      progress: 0
+    };
+  };
+
+  const stages: ResearchStage[] = [
     {
       id: 1,
       name: "Ingestion & Curation",
       description: "Collecting and curating research data from multiple sources",
       icon: Database,
-      status: 'pending',
-      ethicsStatus: 'pending',
-      progress: 0,
+      ...getStageStatus(1),
     },
     {
       id: 2,
       name: "Knowledge Modeling",
       description: "Extracting entities and relationships from curated data",
       icon: Brain,
-      status: 'pending',
-      ethicsStatus: 'pending',
-      progress: 0,
+      ...getStageStatus(2),
     },
     {
       id: 3,
       name: "Hypothesis Generation",
       description: "Creating testable hypotheses with experimental designs",
       icon: Lightbulb,
-      status: 'pending',
-      ethicsStatus: 'pending',
-      progress: 0,
+      ...getStageStatus(3),
     },
     {
       id: 4,
       name: "Simulation & Prioritization",
       description: "Running computational experiments and risk assessment",
       icon: Activity,
-      status: 'pending',
-      ethicsStatus: 'pending',
-      progress: 0,
+      ...getStageStatus(4),
     },
     {
       id: 5,
       name: "Real-World Validation",
       description: "Statistical analysis and publication criteria checking",
       icon: CheckCircle,
-      status: 'pending',
-      ethicsStatus: 'pending',
-      progress: 0,
+      ...getStageStatus(5),
     },
     {
       id: 6,
       name: "Learning Loop & Dissemination",
       description: "Knowledge base updates and research artifact generation",
       icon: RefreshCw,
-      status: 'pending',
-      ethicsStatus: 'pending',
-      progress: 0,
+      ...getStageStatus(6),
     },
-  ]);
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
