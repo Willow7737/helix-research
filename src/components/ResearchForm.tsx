@@ -155,7 +155,7 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
                     <div className="flex items-start gap-3">
                       <Checkbox
                         checked={source.enabled}
-                        onChange={() => toggleDataSource(source.id)}
+                        onCheckedChange={() => toggleDataSource(source.id)}
                         className="mt-0.5"
                       />
                       <div className="flex-1 space-y-1">
