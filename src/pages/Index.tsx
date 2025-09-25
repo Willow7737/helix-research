@@ -14,7 +14,11 @@ import {
   Users, 
   Award,
   Github,
-  ExternalLink 
+  ExternalLink,
+  Sparkles,
+  Target,
+  Rocket,
+  Globe
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
@@ -360,11 +364,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b glass sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-primary rounded-lg">
+              <div className="p-2 bg-gradient-primary rounded-lg animate-float">
                 <Brain className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
@@ -374,10 +378,10 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              <Badge variant="outline" className="hidden sm:flex">
+              <Badge variant="outline" className="hidden sm:flex animate-shimmer">
                 v1.0.0
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="hover:shadow-sm transition-all duration-300">
                 <Github className="h-4 w-4 mr-2" />
                 Docs
               </Button>
@@ -389,7 +393,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px] mx-auto">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[400px] mx-auto shadow-sm">
             <TabsTrigger value="form">Research Form</TabsTrigger>
             <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
             <TabsTrigger value="results">Results</TabsTrigger>
@@ -397,22 +401,41 @@ const Index = () => {
 
           <TabsContent value="form" className="space-y-8">
             {/* Hero Section */}
-            <div className="text-center space-y-6 py-12">
+            <div className="text-center space-y-6 py-12 animate-fade-in-up">
               <div className="space-y-4">
-                <h2 className="text-4xl lg:text-6xl font-bold bg-gradient-research bg-clip-text text-transparent">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-hero rounded-3xl blur-3xl opacity-30 animate-pulse" />
+                  <h2 className="relative text-4xl lg:text-6xl font-bold bg-gradient-research bg-clip-text text-transparent">
                   Automate Your Research
-                </h2>
+                  </h2>
+                </div>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                   Advanced AI-driven research pipeline that ingests data, models knowledge, 
                   generates hypotheses, runs simulations, validates results, and updates learning systems.
                 </p>
+                
+                {/* Key stats */}
+                <div className="flex justify-center items-center gap-8 text-sm text-muted-foreground pt-4">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    <span>6-Stage Pipeline</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-ethics-approved" />
+                    <span>Ethics Integrated</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Rocket className="h-4 w-4 text-stage-4" />
+                    <span>Fully Automated</span>
+                  </div>
+                </div>
               </div>
 
               {/* Features */}
-              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto pt-8">
-                <Card className="shadow-stage hover:shadow-glow transition-all duration-300">
+              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto pt-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <Card className="shadow-card hover:shadow-glow transition-all duration-500 hover:-translate-y-2 group">
                   <CardHeader className="text-center">
-                    <Zap className="h-8 w-8 mx-auto mb-2 text-stage-1" />
+                    <Zap className="h-8 w-8 mx-auto mb-2 text-stage-1 group-hover:animate-pulse" />
                     <CardTitle>6-Stage Pipeline</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -422,9 +445,9 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-stage hover:shadow-glow transition-all duration-300">
+                <Card className="shadow-card hover:shadow-glow transition-all duration-500 hover:-translate-y-2 group" style={{ animationDelay: '0.1s' }}>
                   <CardHeader className="text-center">
-                    <Shield className="h-8 w-8 mx-auto mb-2 text-ethics-approved" />
+                    <Shield className="h-8 w-8 mx-auto mb-2 text-ethics-approved group-hover:animate-pulse" />
                     <CardTitle>Ethics Integration</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -434,9 +457,9 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-stage hover:shadow-glow transition-all duration-300">
+                <Card className="shadow-card hover:shadow-glow transition-all duration-500 hover:-translate-y-2 group" style={{ animationDelay: '0.2s' }}>
                   <CardHeader className="text-center">
-                    <BarChart3 className="h-8 w-8 mx-auto mb-2 text-stage-4" />
+                    <BarChart3 className="h-8 w-8 mx-auto mb-2 text-stage-4 group-hover:animate-pulse" />
                     <CardTitle>Statistical Rigor</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -446,10 +469,65 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </div>
+              
+              {/* Additional features showcase */}
+              <div className="max-w-4xl mx-auto pt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="text-left space-y-4">
+                    <h3 className="text-2xl font-bold flex items-center gap-2">
+                      <Sparkles className="h-6 w-6 text-primary" />
+                      Advanced AI Capabilities
+                    </h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full" />
+                        Automated hypothesis generation with experimental design
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-stage-2 rounded-full" />
+                        Knowledge graph construction and entity extraction
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-stage-4 rounded-full" />
+                        Computational simulation and risk assessment
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-stage-6 rounded-full" />
+                        Continuous learning and model improvement
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <div className="text-left space-y-4">
+                    <h3 className="text-2xl font-bold flex items-center gap-2">
+                      <Globe className="h-6 w-6 text-stage-6" />
+                      Research Impact
+                    </h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-ethics-approved rounded-full" />
+                        Publication-ready statistical validation
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-stage-3 rounded-full" />
+                        Reproducible research methodologies
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-stage-5 rounded-full" />
+                        Open science and knowledge sharing
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full" />
+                        Accelerated scientific discovery
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Research Form */}
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <ResearchForm onSubmit={handleResearchStart} isRunning={isRunning} />
             </div>
           </TabsContent>
@@ -463,6 +541,17 @@ const Index = () => {
                 onStageClick={handleStageClick}
               />
             )}
+            {!currentTopic && (
+              <div className="text-center py-12 animate-fade-in-up">
+                <Brain className="h-16 w-16 mx-auto mb-4 text-muted-foreground animate-float" />
+                <h3 className="text-xl font-medium mb-2">No Active Research</h3>
+                <p className="text-muted-foreground mb-4">Start a new research project to see the pipeline in action</p>
+                <Button onClick={() => setActiveTab("form")} className="bg-gradient-primary hover:shadow-glow">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Start Research
+                </Button>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="results" className="space-y-8">
@@ -473,23 +562,34 @@ const Index = () => {
                 onViewDetails={(stage) => console.log("View details for stage", stage)}
               />
             )}
+            {results.length === 0 && (
+              <div className="text-center py-12 animate-fade-in-up">
+                <BarChart3 className="h-16 w-16 mx-auto mb-4 text-muted-foreground animate-float" />
+                <h3 className="text-xl font-medium mb-2">No Results Yet</h3>
+                <p className="text-muted-foreground mb-4">Complete a research pipeline to view comprehensive results</p>
+                <Button onClick={() => setActiveTab("form")} className="bg-gradient-primary hover:shadow-glow">
+                  <Rocket className="h-4 w-4 mr-2" />
+                  Start Research
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-card/50 backdrop-blur-sm mt-16">
+      <footer className="border-t glass mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
+              <Brain className="h-5 w-5 text-primary animate-pulse" />
               <span className="font-medium">Universal Researcher AI</span>
-              <Badge variant="outline">Research Automation</Badge>
+              <Badge variant="outline" className="animate-shimmer">Research Automation</Badge>
             </div>
             
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>Powered by FastAPI & Next.js</span>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="hover:shadow-sm transition-all duration-300">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Documentation
               </Button>

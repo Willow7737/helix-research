@@ -13,8 +13,11 @@ import {
   MessageSquare, 
   Shield,
   Sparkles,
-  Play
+  Play,
+  Info,
+  CheckCircle2
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DataSource {
   id: string;
@@ -80,10 +83,10 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
   const selectedCount = dataSources.filter(source => source.enabled).length;
 
   return (
-    <Card className="shadow-research border-primary/20">
+    <Card className="shadow-research border-primary/20 animate-fade-in-up">
       <CardHeader className="space-y-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-primary rounded-lg">
+          <div className="p-2 bg-gradient-primary rounded-lg animate-float">
             <Search className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
@@ -93,21 +96,38 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
             </CardDescription>
           </div>
         </div>
+        
+        {/* Progress indicator */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <div className={`w-2 h-2 rounded-full ${topic.trim() ? 'bg-primary' : 'bg-muted'}`} />
+            <span>Topic</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className={`w-2 h-2 rounded-full ${selectedCount > 0 ? 'bg-primary' : 'bg-muted'}`} />
+            <span>Sources</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className={`w-2 h-2 rounded-full ${topic.trim() && selectedCount > 0 ? 'bg-primary' : 'bg-muted'}`} />
+            <span>Ready</span>
+          </div>
+        </div>
       </CardHeader>
 
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Research Topic */}
           <div className="space-y-3">
-            <Label htmlFor="topic" className="text-base font-medium">
-              Research Topic
+            <Label htmlFor="topic" className="text-base font-medium flex items-center gap-2">
+              Research Topic <span className="text-destructive">*</span>
+              {topic.trim() && <CheckCircle2 className="h-4 w-4 text-ethics-approved" />}
             </Label>
             <Input
               id="topic"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g., quantum computing algorithms, machine learning in healthcare"
-              className="text-lg h-12"
+              className="text-lg h-12 focus-enhanced transition-all duration-300"
               required
             />
             <p className="text-sm text-muted-foreground">
@@ -126,15 +146,19 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide additional context about your research objectives, specific questions, or focus areas..."
               rows={3}
-              className="resize-none"
+              className="resize-none focus-enhanced transition-all duration-300"
             />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Info className="h-3 w-3" />
+              <span>Additional context helps improve research quality and relevance</span>
+            </div>
           </div>
 
           {/* Data Sources */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label className="text-base font-medium">Data Sources</Label>
-              <Badge variant="outline" className="ml-2">
+              <Badge variant={selectedCount > 0 ? "default" : "outline"} className="ml-2">
                 {selectedCount} selected
               </Badge>
             </div>
@@ -145,22 +169,24 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
                 return (
                   <div
                     key={source.id}
-                    className={`relative p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-stage ${
+                    className={`relative p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:shadow-stage hover:-translate-y-1 ${
                       source.enabled 
-                        ? 'border-primary bg-primary/5 shadow-stage' 
+                        ? 'border-primary bg-primary/5 shadow-stage animate-shimmer' 
                         : 'border-border hover:border-primary/50'
                     }`}
+                    onClick={() => toggleDataSource(source.id)}
                   >
                     <div className="flex items-start gap-3">
                       <Checkbox
                         checked={source.enabled}
                         onCheckedChange={() => toggleDataSource(source.id)}
-                        className="mt-0.5"
+                        className="mt-0.5 focus-enhanced"
                       />
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4 text-muted-foreground" />
+                          <Icon className={`h-4 w-4 ${source.enabled ? 'text-primary' : 'text-muted-foreground'}`} />
                           <span className="font-medium">{source.name}</span>
+                          {source.enabled && <CheckCircle2 className="h-3 w-3 text-ethics-approved" />}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {source.description}
@@ -172,13 +198,18 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
               })}
             </div>
             
-            <p className="text-sm text-muted-foreground">
-              Select data sources for research ingestion. At least one source is required.
-            </p>
+            {selectedCount === 0 && (
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  Please select at least one data source to proceed with research.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           {/* Ethics Notice */}
-          <div className="p-4 bg-muted/50 rounded-lg border border-muted space-y-2">
+          <div className="p-4 bg-gradient-to-r from-ethics-approved/10 to-primary/10 rounded-lg border border-ethics-approved/20 space-y-2">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-ethics-approved" />
               <span className="font-medium text-sm">Ethics & Safety Review</span>
@@ -192,9 +223,10 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
           {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full h-12 text-lg bg-gradient-primary hover:shadow-glow transition-all duration-300"
+            className="w-full h-12 text-lg bg-gradient-primary hover:shadow-glow transition-all duration-300 focus-enhanced relative overflow-hidden group"
             disabled={!topic.trim() || selectedCount === 0 || isRunning}
           >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             {isRunning ? (
               <>
                 <Sparkles className="h-5 w-5 mr-2 animate-spin" />
@@ -207,6 +239,13 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
               </>
             )}
           </Button>
+          
+          {/* Estimated time */}
+          {topic.trim() && selectedCount > 0 && !isRunning && (
+            <div className="text-center text-sm text-muted-foreground">
+              <span>Estimated completion time: 2-3 minutes</span>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

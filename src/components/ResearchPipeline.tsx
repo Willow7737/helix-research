@@ -12,7 +12,9 @@ import {
   RefreshCw,
   Shield,
   AlertTriangle,
-  Clock
+  Clock,
+  Zap,
+  TrendingUp
 } from "lucide-react";
 
 interface ResearchStage {
@@ -126,60 +128,83 @@ export function ResearchPipeline({ topic, isRunning, results = [], onStageClick 
   return (
     <div className="space-y-6">
       {/* Pipeline Header */}
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-primary rounded-full text-primary-foreground shadow-glow">
+      <div className="text-center space-y-6 animate-fade-in-up">
+        <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-primary rounded-full text-primary-foreground shadow-glow animate-float">
           <Brain className="h-5 w-5 animate-research-pulse" />
           <span className="font-medium">Research Topic: {topic}</span>
         </div>
         
         {/* Overall Progress */}
-        <div className="max-w-md mx-auto space-y-2">
+        <div className="max-w-lg mx-auto space-y-3">
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Overall Progress</span>
-            <span className="font-medium">
+            <span className="font-medium flex items-center gap-1">
+              <TrendingUp className="h-4 w-4" />
               {Math.round(stages.reduce((acc, stage) => acc + stage.progress, 0) / 6)}%
             </span>
           </div>
           <Progress 
             value={stages.reduce((acc, stage) => acc + stage.progress, 0) / 6} 
-            className="h-2 bg-gradient-stage"
+            className="h-3 bg-gradient-stage shadow-sm"
           />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{stages.filter(s => s.status === 'completed').length} completed</span>
+            <span>{stages.filter(s => s.status === 'running').length} running</span>
+            <span>{stages.filter(s => s.status === 'pending').length} pending</span>
+          </div>
         </div>
+        
+        {/* Real-time status */}
+        {isRunning && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-lg text-sm">
+            <Zap className="h-4 w-4 text-primary animate-pulse" />
+            <span>Pipeline actively processing...</span>
+          </div>
+        )}
       </div>
 
       {/* Pipeline Stages */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
         {stages.map((stage, index) => {
           const Icon = stage.icon;
           const isActive = isRunning && stage.status === 'running';
+          const isCompleted = stage.status === 'completed';
           
           return (
             <Card
               key={stage.id}
-              className={`cursor-pointer transition-all duration-300 hover:shadow-stage hover:-translate-y-1 ${
-                isActive ? 'shadow-glow border-primary' : ''
+              className={`cursor-pointer transition-all duration-500 hover:shadow-stage hover:-translate-y-2 ${
+                isActive ? 'shadow-glow border-primary animate-research-pulse' : 
+                isCompleted ? 'shadow-card border-ethics-approved/30' : ''
               }`}
               onClick={() => onStageClick(stage)}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardHeader className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div 
-                      className={`p-2 rounded-full ${getStatusColor(stage.status)} ${
-                        isActive ? 'animate-research-pulse' : ''
+                      className={`p-3 rounded-full transition-all duration-300 ${
+                        isActive ? 'animate-research-pulse shadow-lg' : 
+                        isCompleted ? 'shadow-md' : ''
                       }`}
                       style={{ backgroundColor: `hsl(var(--stage-${stage.id}))` }}
                     >
-                      <Icon className="h-5 w-5 text-white" />
+                      <Icon className={`h-5 w-5 text-white ${isActive ? 'animate-spin' : ''}`} />
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge 
+                      variant={isCompleted ? "default" : "outline"} 
+                      className="text-xs"
+                    >
                       Stage {stage.id}
                     </Badge>
                   </div>
                   
                   {/* Ethics Status */}
                   <div 
-                    className={`p-1 rounded-full ${getEthicsColor(stage.ethicsStatus)}`}
+                    className={`p-1.5 rounded-full transition-all duration-300 ${getEthicsColor(stage.ethicsStatus)} ${
+                      stage.ethicsStatus === 'approved' ? 'shadow-sm' : ''
+                    }`}
                     title={`Ethics Status: ${stage.ethicsStatus}`}
                   >
                     {getEthicsIcon(stage.ethicsStatus)}
@@ -187,7 +212,10 @@ export function ResearchPipeline({ topic, isRunning, results = [], onStageClick 
                 </div>
 
                 <div>
-                  <CardTitle className="text-lg">{stage.name}</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {stage.name}
+                    {isCompleted && <CheckCircle className="h-4 w-4 text-ethics-approved" />}
+                  </CardTitle>
                   <CardDescription className="text-sm">
                     {stage.description}
                   </CardDescription>
@@ -198,11 +226,14 @@ export function ResearchPipeline({ topic, isRunning, results = [], onStageClick 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{stage.progress}%</span>
+                    <span className="font-medium flex items-center gap-1">
+                      {isActive && <Zap className="h-3 w-3 text-primary" />}
+                      {stage.progress}%
+                    </span>
                   </div>
                   <Progress 
                     value={stage.progress} 
-                    className="h-1.5"
+                    className={`h-2 transition-all duration-300 ${isActive ? 'animate-pulse' : ''}`}
                     style={{
                       backgroundColor: `hsl(var(--stage-${stage.id}) / 0.2)`
                     }}
@@ -211,16 +242,26 @@ export function ResearchPipeline({ topic, isRunning, results = [], onStageClick 
 
                 <div className="flex items-center justify-between">
                   <Badge 
-                    variant={stage.status === 'completed' ? 'default' : 'secondary'}
-                    className="capitalize"
+                    variant={
+                      stage.status === 'completed' ? 'default' : 
+                      stage.status === 'running' ? 'outline' : 'secondary'
+                    }
+                    className={`capitalize ${isActive ? 'animate-pulse' : ''}`}
                   >
                     {stage.status}
                   </Badge>
                   
                   {stage.status === 'completed' && (
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="hover:shadow-sm transition-all duration-300">
                       View Results
                     </Button>
+                  )}
+                  
+                  {isActive && (
+                    <div className="flex items-center gap-1 text-xs text-primary">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                      Processing...
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -230,25 +271,35 @@ export function ResearchPipeline({ topic, isRunning, results = [], onStageClick 
       </div>
 
       {/* Stage Flow Visualization */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
         <div className="relative">
           {/* Flow Lines */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-stage transform -translate-y-1/2" />
+          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-stage transform -translate-y-1/2 rounded-full shadow-sm" />
           
           {/* Stage Dots */}
           <div className="relative flex justify-between items-center">
             {stages.map((stage, index) => (
               <div
                 key={stage.id}
-                className={`w-4 h-4 rounded-full border-2 border-background ${
+                className={`w-5 h-5 rounded-full border-2 border-background transition-all duration-300 ${
                   stage.status === 'completed' ? 'bg-accent' :
-                  stage.status === 'running' ? 'bg-primary animate-research-pulse' :
+                  stage.status === 'running' ? 'bg-primary animate-research-pulse shadow-lg' :
                   'bg-muted'
-                }`}
+                } hover:scale-110 cursor-pointer`}
                 style={{
                   backgroundColor: stage.status !== 'pending' ? `hsl(var(--stage-${stage.id}))` : undefined
                 }}
+                title={`Stage ${stage.id}: ${stage.name}`}
               />
+            ))}
+          </div>
+          
+          {/* Stage labels */}
+          <div className="relative flex justify-between items-center mt-4">
+            {stages.map((stage) => (
+              <div key={stage.id} className="text-xs text-center text-muted-foreground max-w-16">
+                <div className="truncate">{stage.name.split(' ')[0]}</div>
+              </div>
             ))}
           </div>
         </div>
