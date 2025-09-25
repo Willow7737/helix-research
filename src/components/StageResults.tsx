@@ -19,7 +19,8 @@ import {
   TrendingUp,
   Award,
   Clock,
-  Users
+  Users,
+  Database
 } from "lucide-react";
 
 interface StageResult {
