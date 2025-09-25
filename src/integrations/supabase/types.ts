@@ -14,7 +14,213 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          organization: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          organization?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          organization?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      project_collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          project_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "research_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      research_artifacts: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          metadata: Json | null
+          name: string
+          stage_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          stage_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          stage_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_artifacts_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "research_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      research_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          progress: number | null
+          sources: string[] | null
+          status: string
+          title: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          progress?: number | null
+          sources?: string[] | null
+          status?: string
+          title: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          progress?: number | null
+          sources?: string[] | null
+          status?: string
+          title?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      research_stages: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          data: Json | null
+          description: string | null
+          ethics_score: number | null
+          ethics_status: string
+          id: string
+          name: string
+          novelty_score: number | null
+          progress: number | null
+          project_id: string
+          quality_score: number | null
+          stage_number: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          data?: Json | null
+          description?: string | null
+          ethics_score?: number | null
+          ethics_status?: string
+          id?: string
+          name: string
+          novelty_score?: number | null
+          progress?: number | null
+          project_id: string
+          quality_score?: number | null
+          stage_number: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          data?: Json | null
+          description?: string | null
+          ethics_score?: number | null
+          ethics_status?: string
+          id?: string
+          name?: string
+          novelty_score?: number | null
+          progress?: number | null
+          project_id?: string
+          quality_score?: number | null
+          stage_number?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "research_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
