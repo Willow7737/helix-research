@@ -26,78 +26,165 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("form");
   const { toast } = useToast();
 
-  // Mock data for demonstration
-  const mockResults = [
-    {
-      stage: 1,
-      name: "Ingestion & Curation",
-      status: "completed" as const,
-      ethicsStatus: "approved" as const,
-      data: [
-        {
-          title: "Advances in Quantum Computing: A Comprehensive Review",
-          quality_score: 0.92,
-          metadata: { provenance: "arXiv", type: "paper" }
+  // Generate dynamic research results based on topic
+  const generateMockResults = (topic: string, sources: string[]) => {
+    const topicKeywords = topic.toLowerCase().split(' ');
+    const mainKeyword = topicKeywords[0] || 'research';
+    
+    return [
+      {
+        stage: 1,
+        name: "Ingestion & Curation",
+        status: "completed" as const,
+        ethicsStatus: "approved" as const,
+        data: [
+          {
+            title: `Advances in ${topic}: A Comprehensive Review`,
+            quality_score: 0.91 + Math.random() * 0.08,
+            metadata: { provenance: "arXiv", type: "paper" }
+          },
+          {
+            title: `Novel ${mainKeyword} implementations and methodologies`,
+            quality_score: 0.85 + Math.random() * 0.10,
+            metadata: { provenance: "Nature", type: "paper" }
+          },
+          {
+            title: `${topic} benchmark dataset v2.0`,
+            quality_score: 0.92 + Math.random() * 0.06,
+            metadata: { provenance: "Kaggle", type: "dataset" }
+          }
+        ],
+        metrics: {
+          qualityScore: 0.89 + Math.random() * 0.10,
+          ethicsScore: 0.96 + Math.random() * 0.04
         },
-        {
-          title: "Novel Quantum Algorithm Implementations",
-          quality_score: 0.87,
-          metadata: { provenance: "Nature", type: "paper" }
+        artifacts: ["curated_data.json", "quality_report.pdf"]
+      },
+      {
+        stage: 2,
+        name: "Knowledge Modeling",
+        status: "completed" as const,
+        ethicsStatus: "approved" as const,
+        data: [
+          { entity: mainKeyword, relation: "ENABLES", evidence_score: 0.92 + Math.random() * 0.06 },
+          { entity: `${mainKeyword} optimization`, relation: "IMPROVES", evidence_score: 0.87 + Math.random() * 0.08 },
+          { entity: `${mainKeyword} frameworks`, relation: "REQUIRES", evidence_score: 0.85 + Math.random() * 0.10 },
+          { entity: `${mainKeyword} validation`, relation: "BASED_ON", evidence_score: 0.90 + Math.random() * 0.08 },
+          { entity: `${mainKeyword} limitations`, relation: "REDUCES", evidence_score: 0.76 + Math.random() * 0.10 }
+        ],
+        metrics: {
+          confidenceScore: 0.86 + Math.random() * 0.10,
+          noveltyScore: 0.71 + Math.random() * 0.15
         },
-        {
-          title: "Quantum Computing Benchmark Dataset v2.0",
-          quality_score: 0.94,
-          metadata: { provenance: "Kaggle", type: "dataset" }
-        }
-      ],
-      metrics: {
-        qualityScore: 0.91,
-        ethicsScore: 0.98
+        artifacts: ["knowledge_graph.json", "entity_relationships.csv"]
       },
-      artifacts: ["curated_data.json", "quality_report.pdf"]
-    },
-    {
-      stage: 2,
-      name: "Knowledge Modeling",
-      status: "completed" as const,
-      ethicsStatus: "approved" as const,
-      data: [
-        { entity: "quantum entanglement", relation: "ENABLES", evidence_score: 0.94 },
-        { entity: "error correction", relation: "IMPROVES", evidence_score: 0.89 },
-        { entity: "quantum gates", relation: "REQUIRES", evidence_score: 0.87 },
-        { entity: "superposition", relation: "BASED_ON", evidence_score: 0.92 },
-        { entity: "decoherence", relation: "REDUCES", evidence_score: 0.78 }
-      ],
-      metrics: {
-        confidenceScore: 0.88,
-        noveltyScore: 0.73
-      },
-      artifacts: ["knowledge_graph.json", "entity_relationships.csv"]
-    },
-    {
-      stage: 3,
-      name: "Hypothesis Generation",
-      status: "completed" as const,
-      ethicsStatus: "approved" as const,
-      data: [
-        {
-          statement: "Quantum error correction improves algorithm reliability by 40%",
-          plausibility: 0.82,
-          design: { duration: "6 months", materials: "Superconducting qubits" }
+      {
+        stage: 3,
+        name: "Hypothesis Generation",
+        status: "completed" as const,
+        ethicsStatus: "approved" as const,
+        data: [
+          {
+            statement: `${topic} optimization improves performance by ${Math.round(30 + Math.random() * 40)}%`,
+            plausibility: 0.78 + Math.random() * 0.15,
+            design: { duration: `${Math.round(3 + Math.random() * 6)} months`, materials: `${mainKeyword} framework` }
+          },
+          {
+            statement: `Advanced ${mainKeyword} techniques reduce computation time by ${Math.round(40 + Math.random() * 30)}%`,
+            plausibility: 0.72 + Math.random() * 0.18,
+            design: { duration: `${Math.round(2 + Math.random() * 4)} months`, materials: `${mainKeyword} simulator` }
+          }
+        ],
+        metrics: {
+          noveltyScore: 0.75 + Math.random() * 0.15,
+          ethicsScore: 0.98 + Math.random() * 0.02
         },
-        {
-          statement: "Hybrid quantum-classical algorithms reduce computation time by 60%",
-          plausibility: 0.75,
-          design: { duration: "4 months", materials: "Quantum simulator" }
-        }
-      ],
-      metrics: {
-        noveltyScore: 0.79,
-        ethicsScore: 1.0
+        artifacts: ["hypotheses.json", "experimental_designs.pdf"]
       },
-      artifacts: ["hypotheses.json", "experimental_designs.pdf"]
-    }
-  ];
+      {
+        stage: 4,
+        name: "Simulation & Prioritization",
+        status: "completed" as const,
+        ethicsStatus: "approved" as const,
+        data: [
+          {
+            hypothesis_id: 1,
+            simulation_results: {
+              performance_gain: Math.round(25 + Math.random() * 50),
+              confidence_interval: "95%",
+              risk_assessment: "Low"
+            },
+            priority_score: 0.82 + Math.random() * 0.15
+          },
+          {
+            hypothesis_id: 2,
+            simulation_results: {
+              performance_gain: Math.round(30 + Math.random() * 40),
+              confidence_interval: "90%",
+              risk_assessment: "Medium"
+            },
+            priority_score: 0.75 + Math.random() * 0.20
+          }
+        ],
+        metrics: {
+          simulationAccuracy: 0.88 + Math.random() * 0.10,
+          riskScore: 0.15 + Math.random() * 0.20
+        },
+        artifacts: ["simulation_results.json", "risk_assessment.pdf"]
+      },
+      {
+        stage: 5,
+        name: "Real-World Validation",
+        status: "completed" as const,
+        ethicsStatus: "approved" as const,
+        data: [
+          {
+            experiment_id: 1,
+            statistical_analysis: {
+              p_value: Math.random() * 0.05,
+              effect_size: 0.65 + Math.random() * 0.30,
+              sample_size: Math.round(100 + Math.random() * 400)
+            },
+            publication_criteria: {
+              statistical_significance: true,
+              effect_size_adequate: true,
+              reproducibility_score: 0.85 + Math.random() * 0.12
+            }
+          }
+        ],
+        metrics: {
+          validationScore: 0.83 + Math.random() * 0.15,
+          reproducibilityScore: 0.87 + Math.random() * 0.10
+        },
+        artifacts: ["validation_results.json", "statistical_report.pdf"]
+      },
+      {
+        stage: 6,
+        name: "Learning Loop & Dissemination",
+        status: "completed" as const,
+        ethicsStatus: "approved" as const,
+        data: [
+          {
+            knowledge_updates: [
+              `Updated ${mainKeyword} knowledge base with new findings`,
+              `Refined ${mainKeyword} prediction models`,
+              `Enhanced ${mainKeyword} recommendation algorithms`
+            ],
+            dissemination_plan: {
+              target_journals: [`Journal of ${topic}`, `${mainKeyword} Research Quarterly`],
+              conference_submissions: 2,
+              open_access_repository: "arXiv"
+            }
+          }
+        ],
+        metrics: {
+          knowledgeIntegration: 0.91 + Math.random() * 0.08,
+          disseminationReach: 0.76 + Math.random() * 0.20
+        },
+        artifacts: ["knowledge_updates.json", "dissemination_report.pdf"]
+      }
+    ];
+  };
 
   const handleResearchStart = async (topic: string, sources: string[], description?: string) => {
     setCurrentTopic(topic);
@@ -110,16 +197,30 @@ const Index = () => {
       description: `Initiating automated research on: ${topic}`,
     });
 
-    // Simulate research pipeline execution
-    setTimeout(() => {
-      setResults(mockResults);
-      setIsRunning(false);
-      setActiveTab("results");
-      toast({
-        title: "Research Completed",
-        description: "All 6 stages completed successfully with ethics approval",
-      });
-    }, 8000);
+    // Simulate progressive research pipeline execution
+    const stageTimings = [2000, 4000, 6000, 8000, 10000, 12000]; // Each stage completion time
+    const dynamicResults = generateMockResults(topic, sources);
+    
+    stageTimings.forEach((timing, index) => {
+      setTimeout(() => {
+        const completedStages = dynamicResults.slice(0, index + 1);
+        setResults(completedStages);
+        
+        if (index === stageTimings.length - 1) {
+          setIsRunning(false);
+          setActiveTab("results");
+          toast({
+            title: "Research Completed",
+            description: "All 6 stages completed successfully with ethics approval",
+          });
+        } else {
+          toast({
+            title: `Stage ${index + 1} Complete`,
+            description: `${dynamicResults[index].name} finished successfully`,
+          });
+        }
+      }, timing);
+    });
   };
 
   const handleStageClick = (stage: any) => {
