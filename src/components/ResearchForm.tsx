@@ -174,12 +174,13 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
                         ? 'border-primary bg-primary/5 shadow-stage animate-shimmer' 
                         : 'border-border hover:border-primary/50'
                     }`}
-                    onClick={() => toggleDataSource(source.id)}
                   >
                     <div className="flex items-start gap-3">
                       <Checkbox
                         checked={source.enabled}
-                        onCheckedChange={() => toggleDataSource(source.id)}
+                        onCheckedChange={(checked) => {
+                          setDataSources(prev => prev.map(s => s.id === source.id ? { ...s, enabled: Boolean(checked) } : s));
+                        }}
                         className="mt-0.5 focus-enhanced"
                       />
                       <div className="flex-1 space-y-1">
