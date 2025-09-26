@@ -28,11 +28,11 @@ interface DataSource {
 }
 
 interface ResearchFormProps {
-  onSubmit: (topic: string, sources: string[], description?: string) => void;
-  isRunning: boolean;
+  onResearchStart: (topic: string, sources: string[], description?: string) => void;
+  isLoading: boolean;
 }
 
-export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
+export function ResearchForm({ onResearchStart, isLoading }: ResearchFormProps) {
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
   const [dataSources, setDataSources] = useState<DataSource[]>([
@@ -77,7 +77,7 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const enabledSources = dataSources.filter(source => source.enabled).map(source => source.id);
-    onSubmit(topic, enabledSources, description);
+    onResearchStart(topic, enabledSources, description);
   };
 
   const selectedCount = dataSources.filter(source => source.enabled).length;
@@ -225,10 +225,10 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
           <Button
             type="submit"
             className="w-full h-12 text-lg bg-gradient-primary hover:shadow-glow transition-all duration-300 focus-enhanced relative overflow-hidden group"
-            disabled={!topic.trim() || selectedCount === 0 || isRunning}
+            disabled={!topic.trim() || selectedCount === 0 || isLoading}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            {isRunning ? (
+            {isLoading ? (
               <>
                 <Sparkles className="h-5 w-5 mr-2 animate-spin" />
                 Research in Progress...
@@ -242,7 +242,7 @@ export function ResearchForm({ onSubmit, isRunning }: ResearchFormProps) {
           </Button>
           
           {/* Estimated time */}
-          {topic.trim() && selectedCount > 0 && !isRunning && (
+          {topic.trim() && selectedCount > 0 && !isLoading && (
             <div className="text-center text-sm text-muted-foreground">
               <span>Estimated completion time: 2-3 minutes</span>
             </div>

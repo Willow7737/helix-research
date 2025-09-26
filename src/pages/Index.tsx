@@ -1,34 +1,134 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { ResearchForm } from "@/components/ResearchForm";
 import { ResearchPipeline } from "@/components/ResearchPipeline";
 import { StageResults } from "@/components/StageResults";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProjectsManager from "@/components/ProjectsManager";
+import Navigation from "@/components/Navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 import { 
-  Brain, 
-  Zap, 
-  Shield, 
+  Download, 
+  FileText, 
   BarChart3, 
   Users, 
-  Award,
-  Github,
-  ExternalLink,
   Sparkles,
+  Github,
+  Twitter,
+  Mail,
+  Shield,
+  Zap,
   Target,
-  Rocket,
-  Globe
+  LogIn
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "researcher" | "user";
+  profile_picture?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Metric {
+  name: string;
+  value: number;
+  description?: string;
+}
+
+interface Artifact {
+  name: string;
+  url: string;
+  type: "report" | "data" | "model";
+  description?: string;
+}
+
+interface Stage {
+  id: number;
+  name: string;
+  description: string;
+  status: "pending" | "running" | "completed" | "failed";
+  metrics: Metric[];
+  artifacts: Artifact[];
+}
+
+interface ResearchProject {
+  id: string;
+  title: string;
+  description?: string;
+  topic: string;
+  sources: string[];
+  status: string;
+  progress: number;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
+interface Task {
+  id: string;
+  name: string;
+  description: string;
+  status: "open" | "in progress" | "completed" | "blocked";
+  priority: "high" | "medium" | "low";
+  due_date?: string;
+  created_at: string;
+  updated_at: string;
+  project_id: string;
+}
+
+interface Source {
+  id: string;
+  url: string;
+  title: string;
+  type: "article" | "report" | "dataset" | "other";
+  access_date: string;
+  project_id: string;
+}
+
+interface StageResult {
+  stage: number;
+  name: string;
+  status: "completed" | "error" | "running";
+  ethicsStatus: "approved" | "warning" | "denied";
+  data: any[];
+  metrics: Record<string, number>;
+  artifacts: string[];
+}
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [currentTopic, setCurrentTopic] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("form");
-  const { toast } = useToast();
+  const [isPipelineRunning, setIsPipelineRunning] = useState(false);
+  const [results, setResults] = useState<StageResult[]>([]);
+  const [activeTab, setActiveTab] = useState("research");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   // Generate dynamic research results based on topic
   const generateMockResults = (topic: string, sources: string[]) => {
@@ -192,8 +292,7 @@ const Index = () => {
 
   const handleResearchStart = async (topic: string, sources: string[], description?: string) => {
     setCurrentTopic(topic);
-    setIsRunning(true);
-    setActiveTab("pipeline");
+    setIsPipelineRunning(true);
     setResults([]); // Clear previous results
     
     toast({
@@ -211,8 +310,7 @@ const Index = () => {
         setResults(completedStages);
         
         if (index === stageTimings.length - 1) {
-          setIsRunning(false);
-          setActiveTab("results");
+          setIsPipelineRunning(false);
           toast({
             title: "Research Completed",
             description: "All 6 stages completed successfully with ethics approval",
@@ -225,10 +323,6 @@ const Index = () => {
         }
       }, timing);
     });
-  };
-
-  const handleStageClick = (stage: any) => {
-    console.log("Stage clicked:", stage);
   };
 
   const handleDownload = (stage: number, artifact: string) => {
@@ -253,92 +347,17 @@ const Index = () => {
     } else if (artifact.endsWith('.pdf')) {
       // Generate real PDF using jsPDF
       const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
       
       // Header
       pdf.setFontSize(20);
-      pdf.setFont(undefined, 'bold');
       pdf.text('Universal Researcher AI', 20, 30);
       pdf.setFontSize(16);
       pdf.text(`Stage ${stage}: ${stageResult?.name || 'Research Report'}`, 20, 45);
       
       // Date and metadata
       pdf.setFontSize(10);
-      pdf.setFont(undefined, 'normal');
       pdf.text(`Generated on: ${new Date().toLocaleString()}`, 20, 55);
       pdf.text(`Research Topic: ${currentTopic}`, 20, 62);
-      
-      // Stage details
-      let yPos = 80;
-      pdf.setFontSize(14);
-      pdf.setFont(undefined, 'bold');
-      pdf.text('Stage Overview', 20, yPos);
-      yPos += 10;
-      
-      pdf.setFontSize(10);
-      pdf.setFont(undefined, 'normal');
-      const stageDescriptions = {
-        1: 'Data ingestion and curation from multiple research sources',
-        2: 'Knowledge modeling and entity relationship extraction',
-        3: 'Hypothesis generation with experimental design',
-        4: 'Computational simulation and risk assessment',
-        5: 'Real-world validation and statistical analysis',
-        6: 'Learning loop updates and research dissemination'
-      };
-      
-      pdf.text(stageDescriptions[stage as keyof typeof stageDescriptions] || '', 20, yPos);
-      yPos += 20;
-      
-      // Metrics
-      if (stageResult?.metrics) {
-        pdf.setFontSize(14);
-        pdf.setFont(undefined, 'bold');
-        pdf.text('Performance Metrics', 20, yPos);
-        yPos += 10;
-        
-        pdf.setFontSize(10);
-        pdf.setFont(undefined, 'normal');
-        Object.entries(stageResult.metrics).forEach(([key, value]) => {
-          if (typeof value === 'number') {
-            pdf.text(`${key}: ${Math.round(value * 100)}%`, 20, yPos);
-            yPos += 7;
-          }
-        });
-        yPos += 10;
-      }
-      
-      // Data summary
-      if (stageResult?.data) {
-        pdf.setFontSize(14);
-        pdf.setFont(undefined, 'bold');
-        pdf.text('Results Summary', 20, yPos);
-        yPos += 10;
-        
-        pdf.setFontSize(10);
-        pdf.setFont(undefined, 'normal');
-        
-        if (Array.isArray(stageResult.data)) {
-          pdf.text(`Total items processed: ${stageResult.data.length}`, 20, yPos);
-          yPos += 7;
-          
-          stageResult.data.slice(0, 5).forEach((item: any, index: number) => {
-            if (yPos > pageHeight - 30) {
-              pdf.addPage();
-              yPos = 30;
-            }
-            
-            const text = item.title || item.statement || item.entity || `Item ${index + 1}`;
-            const lines = pdf.splitTextToSize(text, pageWidth - 40);
-            pdf.text(lines, 20, yPos);
-            yPos += lines.length * 5 + 3;
-          });
-        }
-      }
-      
-      // Footer
-      pdf.setFontSize(8);
-      pdf.text('Generated by Universal Researcher AI - Automated Research Pipeline', 20, pageHeight - 10);
       
       // Download the PDF
       pdf.save(artifact);
@@ -362,238 +381,103 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <header className="border-b glass sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-primary rounded-lg animate-float">
-                <Brain className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Universal Researcher AI</h1>
-                <p className="text-sm text-muted-foreground">Automated 6-Stage Research Pipeline</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="hidden sm:flex animate-shimmer">
-                v1.0.0
-              </Badge>
-              <Button variant="outline" size="sm" className="hover:shadow-sm transition-all duration-300">
-                <Github className="h-4 w-4 mr-2" />
-                Docs
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px] mx-auto shadow-sm">
-            <TabsTrigger value="form">Research Form</TabsTrigger>
-            <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
-          </TabsList>
+        {activeTab === "research" && (
+          <Tabs value="form" onValueChange={() => {}} className="space-y-8">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="form">Research Form</TabsTrigger>
+              <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+              <TabsTrigger value="results">Results</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="form" className="space-y-8">
-            {/* Hero Section */}
-            <div className="text-center space-y-6 py-12 animate-fade-in-up">
-              <div className="space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-hero rounded-3xl blur-3xl opacity-30 animate-pulse" />
-                  <h2 className="relative text-4xl lg:text-6xl font-bold bg-gradient-research bg-clip-text text-transparent">
-                  Automate Your Research
-                  </h2>
-                </div>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Advanced AI-driven research pipeline that ingests data, models knowledge, 
-                  generates hypotheses, runs simulations, validates results, and updates learning systems.
-                </p>
-                
-                {/* Key stats */}
-                <div className="flex justify-center items-center gap-8 text-sm text-muted-foreground pt-4">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-primary" />
-                    <span>6-Stage Pipeline</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-ethics-approved" />
-                    <span>Ethics Integrated</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Rocket className="h-4 w-4 text-stage-4" />
-                    <span>Fully Automated</span>
-                  </div>
-                </div>
-              </div>
+            <TabsContent value="form">
+              <ResearchForm
+                onResearchStart={handleResearchStart}
+                isLoading={isPipelineRunning}
+              />
+            </TabsContent>
 
-              {/* Features */}
-              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto pt-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <Card className="shadow-card hover:shadow-glow transition-all duration-500 hover:-translate-y-2 group">
-                  <CardHeader className="text-center">
-                    <Zap className="h-8 w-8 mx-auto mb-2 text-stage-1 group-hover:animate-pulse" />
-                    <CardTitle>6-Stage Pipeline</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Complete research automation from data ingestion to knowledge dissemination
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-card hover:shadow-glow transition-all duration-500 hover:-translate-y-2 group" style={{ animationDelay: '0.1s' }}>
-                  <CardHeader className="text-center">
-                    <Shield className="h-8 w-8 mx-auto mb-2 text-ethics-approved group-hover:animate-pulse" />
-                    <CardTitle>Ethics Integration</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Built-in ethics review, bias detection, and safety validation at every stage
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-card hover:shadow-glow transition-all duration-500 hover:-translate-y-2 group" style={{ animationDelay: '0.2s' }}>
-                  <CardHeader className="text-center">
-                    <BarChart3 className="h-8 w-8 mx-auto mb-2 text-stage-4 group-hover:animate-pulse" />
-                    <CardTitle>Statistical Rigor</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Comprehensive validation with publication-ready statistical analysis
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Additional features showcase */}
-              <div className="max-w-4xl mx-auto pt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="text-left space-y-4">
-                    <h3 className="text-2xl font-bold flex items-center gap-2">
-                      <Sparkles className="h-6 w-6 text-primary" />
-                      Advanced AI Capabilities
-                    </h3>
-                    <ul className="space-y-2 text-muted-foreground">
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                        Automated hypothesis generation with experimental design
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-stage-2 rounded-full" />
-                        Knowledge graph construction and entity extraction
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-stage-4 rounded-full" />
-                        Computational simulation and risk assessment
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-stage-6 rounded-full" />
-                        Continuous learning and model improvement
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div className="text-left space-y-4">
-                    <h3 className="text-2xl font-bold flex items-center gap-2">
-                      <Globe className="h-6 w-6 text-stage-6" />
-                      Research Impact
-                    </h3>
-                    <ul className="space-y-2 text-muted-foreground">
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-ethics-approved rounded-full" />
-                        Publication-ready statistical validation
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-stage-3 rounded-full" />
-                        Reproducible research methodologies
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-stage-5 rounded-full" />
-                        Open science and knowledge sharing
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                        Accelerated scientific discovery
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Research Form */}
-            <div className="max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-              <ResearchForm onSubmit={handleResearchStart} isRunning={isRunning} />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="pipeline" className="space-y-8">
-            {currentTopic && (
+            <TabsContent value="pipeline">
               <ResearchPipeline
                 topic={currentTopic}
-                isRunning={isRunning}
+                isRunning={isPipelineRunning}
                 results={results}
-                onStageClick={handleStageClick}
+                onStageClick={(stageId) => {
+                  console.log("Clicked stage:", stageId);
+                }}
               />
-            )}
-            {!currentTopic && (
-              <div className="text-center py-12 animate-fade-in-up">
-                <Brain className="h-16 w-16 mx-auto mb-4 text-muted-foreground animate-float" />
-                <h3 className="text-xl font-medium mb-2">No Active Research</h3>
-                <p className="text-muted-foreground mb-4">Start a new research project to see the pipeline in action</p>
-                <Button onClick={() => setActiveTab("form")} className="bg-gradient-primary hover:shadow-glow">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Start Research
-                </Button>
-              </div>
-            )}
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="results" className="space-y-8">
-            {results.length > 0 && (
+            <TabsContent value="results">
               <StageResults
                 results={results}
                 onDownload={handleDownload}
-                onViewDetails={(stage) => console.log("View details for stage", stage)}
+                onViewDetails={(stageId) => {
+                  console.log("View details for stage:", stageId);
+                }}
               />
-            )}
-            {results.length === 0 && (
-              <div className="text-center py-12 animate-fade-in-up">
-                <BarChart3 className="h-16 w-16 mx-auto mb-4 text-muted-foreground animate-float" />
-                <h3 className="text-xl font-medium mb-2">No Results Yet</h3>
-                <p className="text-muted-foreground mb-4">Complete a research pipeline to view comprehensive results</p>
-                <Button onClick={() => setActiveTab("form")} className="bg-gradient-primary hover:shadow-glow">
-                  <Rocket className="h-4 w-4 mr-2" />
-                  Start Research
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        )}
+
+        {activeTab === "projects" && <ProjectsManager />}
       </main>
 
       {/* Footer */}
-      <footer className="border-t glass mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary animate-pulse" />
-              <span className="font-medium">Universal Researcher AI</span>
-              <Badge variant="outline" className="animate-shimmer">Research Automation</Badge>
+      <footer className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mt-16">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-6 w-6 text-primary" />
+                <span className="font-semibold">Universal Researcher AI</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Automated research pipeline with ethics integration and knowledge loop.
+              </p>
             </div>
             
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>Powered by FastAPI & Next.js</span>
-              <Button variant="ghost" size="sm" className="hover:shadow-sm transition-all duration-300">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Documentation
-              </Button>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Features</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>6-Stage Pipeline</li>
+                <li>Ethics Integration</li>
+                <li>Real-time Validation</li>
+                <li>Knowledge Loop</li>
+              </ul>
             </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold">Resources</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Documentation</li>
+                <li>API Reference</li>
+                <li>Research Papers</li>
+                <li>Community</li>
+              </ul>
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold">Connect</h4>
+              <div className="flex space-x-4">
+                <Button variant="ghost" size="sm">
+                  <Github className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Twitter className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Mail className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
+            <p>&copy; 2024 Universal Researcher AI. All rights reserved.</p>
           </div>
         </div>
       </footer>
