@@ -111,7 +111,7 @@ const Index = () => {
   const [isPipelineRunning, setIsPipelineRunning] = useState(false);
   const [results, setResults] = useState<StageResult[]>([]);
   const [activeTab, setActiveTab] = useState("research");
-  const [researchTab, setResearchTab] = useState<"form" | "pipeline" | "results">("form");
+  const [researchTab, setResearchTab] = useState<"form" | "pipeline" | "results" | "export">("form");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -123,6 +123,8 @@ const Index = () => {
   useEffect(() => {
     if (isPipelineRunning) {
       setResearchTab("pipeline");
+    } else if (results.length >= 6) {
+      setResearchTab("export");
     } else if (results.length > 0) {
       setResearchTab("results");
     } else {
@@ -401,11 +403,12 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         {activeTab === "research" && (
-          <Tabs value={researchTab} onValueChange={(val) => setResearchTab(val as "form" | "pipeline" | "results")} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs value={researchTab} onValueChange={(val) => setResearchTab(val as "form" | "pipeline" | "results" | "export")} className="space-y-8">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="form">Research Form</TabsTrigger>
               <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
               <TabsTrigger value="results">Results</TabsTrigger>
+              <TabsTrigger value="export">Export</TabsTrigger>
             </TabsList>
 
             <TabsContent value="form">
