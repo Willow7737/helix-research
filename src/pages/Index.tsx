@@ -111,12 +111,24 @@ const Index = () => {
   const [isPipelineRunning, setIsPipelineRunning] = useState(false);
   const [results, setResults] = useState<StageResult[]>([]);
   const [activeTab, setActiveTab] = useState("research");
+  const [researchTab, setResearchTab] = useState<"form" | "pipeline" | "results">("form");
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
+
+  // Auto-switch research sub-tabs based on pipeline state
+  useEffect(() => {
+    if (isPipelineRunning) {
+      setResearchTab("pipeline");
+    } else if (results.length > 0) {
+      setResearchTab("results");
+    } else {
+      setResearchTab("form");
+    }
+  }, [isPipelineRunning, results.length]);
 
   if (loading) {
     return (
@@ -292,6 +304,8 @@ const Index = () => {
 
   const handleResearchStart = async (topic: string, sources: string[], description?: string) => {
     setCurrentTopic(topic);
+    setActiveTab("research");
+    setResearchTab("pipeline");
     setIsPipelineRunning(true);
     setResults([]); // Clear previous results
     
@@ -311,6 +325,7 @@ const Index = () => {
         
         if (index === stageTimings.length - 1) {
           setIsPipelineRunning(false);
+          setResearchTab("results");
           toast({
             title: "Research Completed",
             description: "All 6 stages completed successfully with ethics approval",
@@ -386,7 +401,7 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8">
         {activeTab === "research" && (
-          <Tabs value="form" onValueChange={() => {}} className="space-y-8">
+          <Tabs value={researchTab} onValueChange={(val) => setResearchTab(val as "form" | "pipeline" | "results")} className="space-y-8">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="form">Research Form</TabsTrigger>
               <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
