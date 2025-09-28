@@ -10,6 +10,7 @@ import { ResearchPipeline } from "@/components/ResearchPipeline";
 import { StageResults } from "@/components/StageResults";
 import ProjectsManager from "@/components/ProjectsManager";
 import Navigation from "@/components/Navigation";
+import { ResearchExport } from "@/components/ResearchExport";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { 
@@ -327,10 +328,10 @@ const Index = () => {
         
         if (index === stageTimings.length - 1) {
           setIsPipelineRunning(false);
-          setResearchTab("results");
+          setResearchTab("export");
           toast({
             title: "Research Completed",
-            description: "All 6 stages completed successfully with ethics approval",
+            description: "Professional research report ready for export and review",
           });
         } else {
           toast({
@@ -436,6 +437,15 @@ const Index = () => {
                 onViewDetails={(stageId) => {
                   console.log("View details for stage:", stageId);
                 }}
+              />
+            </TabsContent>
+
+            <TabsContent value="export">
+              <ResearchExport 
+                topic={currentTopic}
+                description={`Professional research conducted using advanced 6-stage pipeline`}
+                results={results}
+                projectId={user?.id}
               />
             </TabsContent>
           </Tabs>
