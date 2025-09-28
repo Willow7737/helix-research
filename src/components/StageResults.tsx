@@ -126,14 +126,14 @@ export function StageResults({ results, onDownload, onViewDetails }: StageResult
                           <Award className="h-4 w-4 text-ethics-approved" />
                         )}
                       </CardTitle>
-                      <CardDescription>
+                      <div className="text-sm text-muted-foreground">
                         <div className="flex items-center gap-2">
                           {getEthicsIcon(result.ethicsStatus)} 
                           <span className="capitalize">Ethics: {result.ethicsStatus}</span>
                           <Clock className="h-3 w-3 ml-2" />
                           <span>Completed</span>
                         </div>
-                      </CardDescription>
+                      </div>
                     </div>
                   </div>
 

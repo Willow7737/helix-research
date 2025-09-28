@@ -49,8 +49,57 @@ export function ResearchExport({ topic, description, results, projectId }: Resea
   const handleExportPDF = async () => {
     setIsGenerating(true);
     try {
-      // Simulate PDF generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Generate comprehensive PDF report
+      const reportContent = generatePDFContent();
+      
+      // Create and download PDF using jsPDF
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF();
+      
+      // Add title page
+      pdf.setFontSize(24);
+      pdf.text('Professional Research Report', 20, 30);
+      pdf.setFontSize(16);
+      pdf.text(`Topic: ${topic}`, 20, 50);
+      pdf.setFontSize(12);
+      pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 70);
+      
+      // Add executive summary
+      pdf.addPage();
+      pdf.setFontSize(18);
+      pdf.text('Executive Summary', 20, 30);
+      pdf.setFontSize(12);
+      
+      const summary = generateExecutiveSummary();
+      let yPosition = 50;
+      pdf.text(`Completion: ${summary.completion}`, 20, yPosition);
+      pdf.text(`Quality: ${summary.quality}`, 20, yPosition += 20);
+      pdf.text(`Ethics: ${summary.ethics}`, 20, yPosition += 20);
+      pdf.text(`Impact: ${summary.impact}`, 20, yPosition += 20);
+      
+      // Add results for each stage
+      results.forEach((result, index) => {
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.text(`Stage ${result.stage}: ${result.name}`, 20, 30);
+        pdf.setFontSize(12);
+        pdf.text(`Status: ${result.status}`, 20, 50);
+        pdf.text(`Ethics: ${result.ethicsStatus}`, 20, 70);
+        
+        if (result.metrics) {
+          pdf.text('Performance Metrics:', 20, 90);
+          if (result.metrics.qualityScore) {
+            pdf.text(`Quality Score: ${Math.round(result.metrics.qualityScore * 100)}%`, 30, 110);
+          }
+          if (result.metrics.confidenceScore) {
+            pdf.text(`Confidence: ${Math.round(result.metrics.confidenceScore * 100)}%`, 30, 130);
+          }
+        }
+      });
+      
+      // Save the PDF
+      const fileName = `research-report-${topic.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
       
       toast({
         title: "Report Generated",
@@ -68,40 +117,61 @@ export function ResearchExport({ topic, description, results, projectId }: Resea
   };
 
   const handleExportData = async () => {
-    const exportData = {
-      metadata: {
-        topic,
-        description,
-        exportDate: new Date().toISOString(),
-        projectId,
-        totalStages: results.length,
-        completionRate: (results.filter(r => r.status === 'completed').length / results.length) * 100
-      },
-      summary: {
-        averageQuality: results.reduce((acc, r) => acc + (r.metrics?.qualityScore || 0), 0) / results.length,
-        averageConfidence: results.reduce((acc, r) => acc + (r.metrics?.confidenceScore || 0), 0) / results.length,
-        averageEthics: results.reduce((acc, r) => acc + (r.metrics?.ethicsScore || 0), 0) / results.length,
-        averageNovelty: results.reduce((acc, r) => acc + (r.metrics?.noveltyScore || 0), 0) / results.length,
-        ethicsApprovalRate: (results.filter(r => r.ethicsStatus === 'approved').length / results.length) * 100
-      },
+    try {
+      const exportData = {
+        metadata: {
+          topic,
+          description,
+          exportDate: new Date().toISOString(),
+          projectId,
+          totalStages: results.length,
+          completionRate: (results.filter(r => r.status === 'completed').length / results.length) * 100
+        },
+        summary: {
+          averageQuality: results.reduce((acc, r) => acc + (r.metrics?.qualityScore || 0), 0) / results.length,
+          averageConfidence: results.reduce((acc, r) => acc + (r.metrics?.confidenceScore || 0), 0) / results.length,
+          averageEthics: results.reduce((acc, r) => acc + (r.metrics?.ethicsScore || 0), 0) / results.length,
+          averageNovelty: results.reduce((acc, r) => acc + (r.metrics?.noveltyScore || 0), 0) / results.length,
+          ethicsApprovalRate: (results.filter(r => r.ethicsStatus === 'approved').length / results.length) * 100
+        },
+        stages: results,
+        artifacts: results.flatMap(r => r.artifacts || [])
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `research-data-${topic.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Data Exported",
+        description: "Research data exported as JSON file.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Unable to export data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const generatePDFContent = () => {
+    return {
+      title: topic,
+      summary: generateExecutiveSummary(),
       stages: results,
-      artifacts: results.flatMap(r => r.artifacts || [])
+      metadata: {
+        generateDate: new Date().toISOString(),
+        projectId,
+        totalPages: results.length + 3
+      }
     };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `research-data-${topic.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Data Exported",
-      description: "Research data exported as JSON file.",
-    });
   };
 
   const generateExecutiveSummary = () => {
