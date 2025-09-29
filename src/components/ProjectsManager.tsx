@@ -222,7 +222,14 @@ Government reports"
                 
                 <div className="flex justify-between items-center pt-2">
                   <div className="flex space-x-2">
-                    <Button size="sm" variant="default">
+                    <Button 
+                      size="sm" 
+                      variant="default"
+                      onClick={() => {
+                        // TODO: Implement run project functionality
+                        console.log("Running project:", project.id);
+                      }}
+                    >
                       <Play className="h-3 w-3 mr-1" />
                       Run
                     </Button>

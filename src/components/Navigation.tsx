@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Settings, User, Home, FolderOpen, Brain, Zap, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { MobileNavigation } from "./MobileNavigation";
 
 interface NavigationProps {
   activeTab: string;
@@ -25,19 +26,22 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center gap-3">
+      <div className="container-responsive">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <div className="flex items-center space-x-4 sm:space-x-8">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <Brain className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-stage-3 bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-stage-3 bg-clip-text text-transparent hidden sm:block">
                 Universal Researcher AI
+              </h1>
+              <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-stage-3 bg-clip-text text-transparent sm:hidden">
+                URA
               </h1>
             </div>
             
-            <div className="flex space-x-1">
+            <div className="hidden md:flex space-x-1">
               <Button
                 variant={activeTab === "dashboard" ? "default" : "ghost"}
                 size="sm"
@@ -77,10 +81,16 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" className="bg-gradient-premium text-white border-0 hover:shadow-glow">
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <MobileNavigation activeTab={activeTab} onTabChange={onTabChange} />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onTabChange("pricing")}
+              className="bg-gradient-premium text-white border-0 hover:shadow-glow hover:bg-gradient-premium/90 hidden sm:flex"
+            >
+              <Crown className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Upgrade</span>
             </Button>
             
             <DropdownMenu>
@@ -101,11 +111,11 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onTabChange("profile")}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onTabChange("settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>

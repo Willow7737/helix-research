@@ -228,7 +228,16 @@ export function PricingPage({ onPlanSelect }: PricingPageProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-2xl font-bold text-primary">{addon.price}</div>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    toast({
+                      title: "Add-on Selected",
+                      description: `${addon.name} will be added to your plan.`,
+                    });
+                  }}
+                >
                   Add to Plan
                 </Button>
               </CardContent>
@@ -267,11 +276,30 @@ export function PricingPage({ onPlanSelect }: PricingPageProps) {
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button variant="secondary" size="lg">
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => {
+                toast({
+                  title: "Contact Sales",
+                  description: "Our sales team will be in touch within 24 hours.",
+                });
+              }}
+            >
               <Users className="h-5 w-5 mr-2" />
               Contact Sales
             </Button>
-            <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-white/20 text-white hover:bg-white/10"
+              onClick={() => {
+                toast({
+                  title: "Demo Scheduled",
+                  description: "We'll send you a calendar link to schedule your demo.",
+                });
+              }}
+            >
               <Rocket className="h-5 w-5 mr-2" />
               Schedule Demo
             </Button>

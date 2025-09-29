@@ -196,9 +196,31 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Dark theme glass effect */
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Enhanced focus states */
 .focus-enhanced:focus-visible {
   outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
   box-shadow: 0 0 0 4px hsl(var(--primary)/0.1);
+}
+
+/* Responsive utilities */
+.container-responsive {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Better mobile spacing */
+@media (max-width: 640px) {
+  .space-y-mobile > * + * {
+    margin-top: 1rem;
+  }
+  
+  .gap-mobile {
+    gap: 0.75rem;
+  }
 }

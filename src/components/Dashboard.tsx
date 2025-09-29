@@ -199,7 +199,13 @@ export function Dashboard({ onStartResearch, onViewProjects, onUpgrade }: Dashbo
               <Crown className="h-4 w-4 mr-2" />
               Upgrade to Pro
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                // TODO: Implement enterprise contact functionality
+                console.log("Contact enterprise sales");
+              }}
+            >
               <Users className="h-4 w-4 mr-2" />
               Enterprise Solution
             </Button>
