@@ -52,12 +52,23 @@
     --ethics-warning: 45 90% 60%;
     --ethics-denied: 0 80% 60%;
 
+    /* Premium colors */
+    --premium: 280 80% 55%;
+    --premium-foreground: 210 40% 98%;
+    --enterprise: 320 90% 45%;
+    --enterprise-foreground: 210 40% 98%;
+    --gold: 45 100% 50%;
+    --gold-foreground: 222.2 47.4% 11.2%;
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-research: linear-gradient(135deg, hsl(var(--stage-1)), hsl(var(--stage-6)));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)/0.5));
     --gradient-stage: linear-gradient(90deg, hsl(var(--stage-1)), hsl(var(--stage-2)), hsl(var(--stage-3)), hsl(var(--stage-4)), hsl(var(--stage-5)), hsl(var(--stage-6)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)/0.1), hsl(var(--stage-3)/0.1), hsl(var(--stage-6)/0.1));
+    --gradient-premium: linear-gradient(135deg, hsl(var(--premium)), hsl(var(--gold)));
+    --gradient-enterprise: linear-gradient(135deg, hsl(var(--enterprise)), hsl(var(--premium)));
+    --gradient-pricing: linear-gradient(180deg, hsl(var(--background)), hsl(var(--premium)/0.05));
 
     /* Shadows */
     --shadow-research: 0 12px 35px -12px hsl(var(--primary) / 0.25);

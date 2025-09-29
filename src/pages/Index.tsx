@@ -11,6 +11,8 @@ import { StageResults } from "@/components/StageResults";
 import ProjectsManager from "@/components/ProjectsManager";
 import Navigation from "@/components/Navigation";
 import { ResearchExport } from "@/components/ResearchExport";
+import { Dashboard } from "@/components/Dashboard";
+import { PricingPage } from "@/components/PricingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { 
@@ -111,7 +113,7 @@ const Index = () => {
   const [currentTopic, setCurrentTopic] = useState("");
   const [isPipelineRunning, setIsPipelineRunning] = useState(false);
   const [results, setResults] = useState<StageResult[]>([]);
-  const [activeTab, setActiveTab] = useState("research");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [researchTab, setResearchTab] = useState<"form" | "pipeline" | "results" | "export">("form");
 
   useEffect(() => {
@@ -403,14 +405,26 @@ const Index = () => {
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="container mx-auto px-4 py-8">
-        {activeTab === "research" && (
-          <Tabs value={researchTab} onValueChange={(val) => setResearchTab(val as "form" | "pipeline" | "results" | "export")} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="form">Research Form</TabsTrigger>
-              <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-              <TabsTrigger value="results">Results</TabsTrigger>
-              <TabsTrigger value="export">Export</TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+          <TabsContent value="dashboard" className="space-y-6">
+            <Dashboard 
+              onStartResearch={() => {
+                setActiveTab("research");
+                setResearchTab("form");
+              }}
+              onViewProjects={() => setActiveTab("projects")}
+              onUpgrade={() => setActiveTab("pricing")}
+            />
+          </TabsContent>
+
+          <TabsContent value="research" className="space-y-6">
+            <Tabs value={researchTab} onValueChange={(val) => setResearchTab(val as "form" | "pipeline" | "results" | "export")} className="space-y-8">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="form">Research Form</TabsTrigger>
+                <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+                <TabsTrigger value="results">Results</TabsTrigger>
+                <TabsTrigger value="export">Export</TabsTrigger>
+              </TabsList>
 
             <TabsContent value="form">
               <ResearchForm
@@ -448,10 +462,19 @@ const Index = () => {
                 projectId={user?.id}
               />
             </TabsContent>
-          </Tabs>
-        )}
+            </Tabs>
+          </TabsContent>
 
-        {activeTab === "projects" && <ProjectsManager />}
+          <TabsContent value="projects" className="space-y-6">
+            <ProjectsManager />
+          </TabsContent>
+
+          <TabsContent value="pricing" className="space-y-6">
+            <PricingPage onPlanSelect={(plan) => {
+              console.log("Selected plan:", plan);
+            }} />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Footer */}
